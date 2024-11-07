@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clock with Date</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      font-family: Arial, sans-serif;
+      background-color: black;
+      color: white;
+      margin: 0;
+    }
+
+    #clock {
+      font-size: 6em;
+    }
+
+    #date {
+      font-size: 2em;
+      margin-top: 10px;
+    }
+
+    .alert-red {
+      color: red;
+    }
+
+    .alert-green {
+      color: green;
+    }
+  </style>
+</head>
+<body>
+  <div id="clock"></div>
+  <div id="date"></div>
+
+  <script>
+    const bavarianVacations = [
+      new Date('2024-12-23'), // Christmas Holidays 2024
+      new Date('2025-03-03'), // Winter Holidays 2025
+      new Date('2025-04-14'), // Easter Holidays 2025
+      new Date('2025-06-10'), // Pentecost Holidays 2025
+      new Date('2025-08-01'), // Summer Holidays 2025
+      new Date('2025-11-03'), // Autumn Holidays 2025 - First part
+      new Date('2025-11-19')  // Autumn Holidays 2025 - Second part
+    ];
+
+    function isBeforeVacation() {
+      const today = new Date();
+      for (let vacation of bavarianVacations) {
+        const dayBeforeVacation = new Date(vacation);
+        dayBeforeVacation.setDate(vacation.getDate() - 1); // One day before vacation start
+        if (
+          today.getDate() === dayBeforeVacation.getDate() &&
+          today.getMonth() === dayBeforeVacation.getMonth() &&
+          today.getFullYear() === dayBeforeVacation.getFullYear()
+        ) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function updateClock() {
+      const now = new Date().toLocaleString("en-US", { timeZone: "Europe/Berlin" });
+      const berlinTime = new Date(now);
+      const hours = String(berlinTime.getHours()).padStart(2, '0');
+      const minutes = String(berlinTime.getMinutes()).padStart(2, '0');
+      const seconds = String(berlinTime.getSeconds()).padStart(2, '0');
+      const day = String(berlinTime.getDate()).padStart(2, '0');
+      const month = String(berlinTime.getMonth() + 1).padStart(2, '0');
+      const year = berlinTime.getFullYear();
+      const weekday = berlinTime.getDay();
+
+      const clock = document.getElementById('clock');
+      const date = document.getElementById('date');
+
+      clock.textContent = `${hours}:${minutes}:${seconds}`;
+      date.textContent = `${day}/${month}/${year}`;
+
+      // Determine if red or green alert should be applied
+      const isRedAlert = (
+        ((weekday >= 1 && weekday <= 5) && ((hours == 9 && minutes >= 30 && minutes < 50) || (hours == 11 && minutes >= 20 && minutes < 40))) ||
+        ((weekday === 2 || weekday === 3) && ((hours == 12 && minutes >= 25) || (hours == 13 && minutes < 10)))
+      );
+
+      const isGreenAlert = (weekday === 5 && hours == 13 && minutes == 10 && isBeforeVacation());
+
+      if (isGreenAlert) {
+        clock.classList.add('alert-green');
+        date.classList.add('alert-green');
+        clock.classList.remove('alert-red');
+        date.classList.remove('alert-red');
+      } else if (isRedAlert) {
+        clock.classList.add('alert-red');
+        date.classList.add('alert-red');
+        clock.classList.remove('alert-green');
+        date.classList.remove('alert-green');
+      } else {
+        clock.classList.remove('alert-red', 'alert-green');
+        date.classList.remove('alert-red', 'alert-green');
+      }
+    }
+
+    setInterval(updateClock, 1000);
+    updateClock();
+  </script>
+</body>
+</html>
